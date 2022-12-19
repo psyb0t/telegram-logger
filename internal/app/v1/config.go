@@ -15,8 +15,9 @@ const (
 )
 
 type config struct {
-	ListenAddress string `yaml:"listenAddress" validate:"hostname_port"`
-	LogLevel      string `yaml:"logLevel"`
+	ListenAddress    string `yaml:"listenAddress" validate:"hostname_port"`
+	LogLevel         string `yaml:"logLevel"`
+	TelegramBotToken string `mapstructure:"telegramBotToken"`
 }
 
 func newConfig() (config, error) {
@@ -26,8 +27,9 @@ func newConfig() (config, error) {
 	}
 
 	defaults := map[string]interface{}{
-		"listenAddress": defaultListenAddress,
-		"logLevel":      defaultLogLevel,
+		"listenAddress":    defaultListenAddress,
+		"logLevel":         defaultLogLevel,
+		"telegramBotToken": "",
 	}
 
 	cfg := config{}

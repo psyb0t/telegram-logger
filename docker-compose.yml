@@ -3,10 +3,11 @@ services:
   server:
     build:
       dockerfile: ./Dockerfile
-    image: github.com/psyb0t/telegram-logger
+    image: psyb0t/telegram-logger
     ports:
       - 8080:80
     volumes:
       - ./config.yml:/root/config.yml
     environment:
       - CONFIGFILE=/root/config.yml
+      - TELEGRAMBOTTOKEN=${TELEGRAMBOTTOKEN}

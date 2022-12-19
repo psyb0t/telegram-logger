@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/fasthttp/router v1.4.14
 	github.com/go-playground/validator/v10 v10.11.1
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/psyb0t/glogger v0.0.0-20221219024435-5aee11b7447f
 	github.com/psyb0t/go-config-parser v0.0.0-20221219022636-67c32dc17128
 	github.com/valyala/fasthttp v1.43.0
