@@ -2,8 +2,8 @@ package types
 
 // User represents a user in the system.
 type User struct {
-	// ID is the unique identifier for the user representing the telegram chat ID.
+	// ID is the unique identifier for the user which acts like a token
 	ID string
-	// Token is a unique token associated with the user.
-	Token string
+	// TelegramChatID is the telegram chat ID of the user
+	TelegramChatID int64
 }

@@ -11,4 +11,10 @@ type Storage interface {
 	// Ping checks if the database is reachable and responding.
 	// It returns nil if the database is reachable and responding, or an error otherwise.
 	Ping() error
+
+	// GetUserRepositoryReader returns a repository for reading user data from the database
+	GetUserRepositoryReader() UserRepositoryReader
+
+	// GetUserRepositoryWriter returns a repository for writing user data from the database
+	GetUserRepositoryWriter() UserRepositoryWriter
 }

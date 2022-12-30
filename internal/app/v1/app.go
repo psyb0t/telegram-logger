@@ -94,67 +94,77 @@ func (a *app) start() error {
 		Function: "start",
 	})
 
-	defer a.cleanup()
-	defer a.cancelFunc()
-
-	var err error
-	var wg sync.WaitGroup
-
 	log.Info("opening the database connection")
-	if err = a.db.Open(a.config.Storage.BadgerDB.DSN); err != nil {
+	if err := a.db.Open(a.config.Storage.BadgerDB.DSN); err != nil {
 		return errors.Wrap(ErrUnableToOpenDatabaseConnection, err.Error())
 	}
 
+	var wg sync.WaitGroup
+
+	httpServerErrCh := make(chan error, 1)
 	wg.Add(1)
-	errCh := make(chan error, 1)
-	go func() {
-		defer wg.Done()
+	go a.startHTTPServer(&wg, httpServerErrCh)
 
-		log.Info("Starting HTTP server on " + a.config.ListenAddress)
-		defer log.Info("HTTP server stopped")
-
-		err := a.httpServer.ListenAndServe(a.config.ListenAddress)
-		if errCh != nil {
-			errCh <- err
-			close(errCh)
-			errCh = nil
-		}
-	}()
-
+	telegramBotMessageHandlerErrCh := make(chan error, 1)
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	go a.startTelegramBotMessageHandler(&wg, telegramBotMessageHandlerErrCh)
 
-		log.Info("starting the Telegram bot message handler")
-		defer log.Info("Telegram bot message handler stopped")
-
-		err := a.telegramBotMessageHandler()
-		if errCh != nil {
-			errCh <- err
-			close(errCh)
-			errCh = nil
-		}
-	}()
-
+	var err error
 	select {
 	case <-a.ctx.Done():
 		log.Info("context is done")
-
-		log.Info("gracefully shutting down the HTTP sever")
-		if err := a.httpServer.Shutdown(); err != nil {
-			log.Info("HTTP server graceful shutdown failed:", err)
-		}
-
 		err = a.ctx.Err()
-	case err = <-errCh:
+	case err = <-httpServerErrCh:
 		if err != nil {
-			log.Info("HTTP server encountered an error:", err)
+			log.Info("HTTP server encountered an error", err)
+		}
+	case err = <-telegramBotMessageHandlerErrCh:
+		if err != nil {
+			log.Info("Telegram bot message handler encountered an error", err)
 		}
 	}
 
+	a.cancelFunc()
+	a.cleanup()
+
+	log.Debug("waiting for wait group to de done")
 	wg.Wait()
 
 	return err
+}
+
+func (a *app) startHTTPServer(wg *sync.WaitGroup, errCh chan<- error) {
+	defer wg.Done()
+	defer close(errCh)
+
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
+		Package:  packageName,
+		Receiver: "app",
+		Function: "startHTTPServer",
+	})
+
+	log.Info("Starting HTTP server on " + a.config.ListenAddress)
+	defer log.Info("HTTP server stopped")
+
+	errCh <- a.httpServer.ListenAndServe(a.config.ListenAddress)
+}
+
+func (a *app) startTelegramBotMessageHandler(wg *sync.WaitGroup, errCh chan<- error) {
+	defer wg.Done()
+	defer close(errCh)
+
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
+		Package:  packageName,
+		Receiver: "app",
+		Function: "startHTTPServer",
+	})
+
+	log.Info("starting the Telegram bot message handler")
+	defer log.Info("Telegram bot message handler stopped")
+
+	errCh <- a.telegramBotMessageHandler()
 }
 
 func (a *app) stop() {
@@ -165,7 +175,7 @@ func (a *app) stop() {
 		Function: "stop",
 	})
 
-	log.Debug("cancelling app context")
+	log.Info("cancelling app context")
 	a.cancelFunc()
 }
 
@@ -185,6 +195,11 @@ func (a *app) cleanup() {
 
 	log.Info("cleanup started")
 	defer log.Info("cleanup complete")
+
+	log.Info("gracefully shutting down the HTTP sever")
+	if err := a.httpServer.Shutdown(); err != nil {
+		log.Info("HTTP server graceful shutdown failed:", err)
+	}
 
 	log.Info("closing the database connection")
 	if err := a.db.Close(); err != nil {

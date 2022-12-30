@@ -7,6 +7,7 @@ require (
 	github.com/fasthttp/router v1.4.14
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/psyb0t/glogger v0.0.0-20221219024435-5aee11b7447f
 	github.com/psyb0t/go-config-parser v0.0.0-20221219022636-67c32dc17128

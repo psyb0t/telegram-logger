@@ -11,18 +11,30 @@ import (
 
 const prefixUserKey = "user-"
 
+// filterFunc is a function that accepts a database []byte value as a parameter
+//
+// returns a boolean value. true if filter passed, false if not.
+type filterFunc func(val []byte) bool
+
 // badgerDB is a struct that implements the Storage interface using a BadgerDB database.
 type badgerDB struct {
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	db         *badger.DB
-	wg         sync.WaitGroup
+	ctx            context.Context
+	cancelFunc     context.CancelFunc
+	db             *badger.DB
+	wg             sync.WaitGroup
+	userRepository struct {
+		reader storage.UserRepositoryReader
+		writer storage.UserRepositoryWriter
+	}
 }
 
 // New creates and returns a new badgerDB instance.
 func New(parentCtx context.Context) (storage.Storage, error) {
 	db := &badgerDB{}
 	db.ctx, db.cancelFunc = context.WithCancel(parentCtx)
+
+	db.userRepository.reader = newUserRepositoryReader(db)
+	db.userRepository.writer = newUserRepositoryWriter(db)
 
 	return db, nil
 }
@@ -55,6 +67,16 @@ func (db *badgerDB) Ping() error {
 	return nil
 }
 
+// GetUserRepositoryReader returns a repository for reading user data from the database
+func (db *badgerDB) GetUserRepositoryReader() storage.UserRepositoryReader {
+	return db.userRepository.reader
+}
+
+// GetUserRepositoryWriter returns a repository for writing user data from the database
+func (db *badgerDB) GetUserRepositoryWriter() storage.UserRepositoryWriter {
+	return db.userRepository.writer
+}
+
 // get retrieves a value by key
 func (db *badgerDB) get(key []byte) ([]byte, error) {
 	db.wg.Add(1)
@@ -69,7 +91,7 @@ func (db *badgerDB) get(key []byte) ([]byte, error) {
 	if err != nil {
 		// If the key is not found, return an error.
 		if err == badger.ErrKeyNotFound {
-			return nil, ErrNotFound
+			return nil, storage.ErrNotFound
 		}
 
 		return nil, err
@@ -118,6 +140,41 @@ func (db *badgerDB) getAllByPrefix(prefix []byte) ([][]byte, error) {
 	return result, nil
 }
 
+// findByPrefixAndFilterFunc retrieve a value from a key prefixed with prefix
+// which also passes the given filterFunc
+func (db *badgerDB) findByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc) ([]byte, error) {
+	db.wg.Add(1)
+	defer db.wg.Done()
+
+	// Start a new transaction.
+	tx := db.db.NewTransaction(false)
+	defer tx.Discard()
+
+	// Create a new iterator to iterate over all prefixed keys in the database.
+	opts := badger.DefaultIteratorOptions
+	opts.Prefix = prefix
+
+	it := tx.NewIterator(opts)
+	defer it.Close()
+
+	// Iterate over all keys in the database.
+	for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+		// Retrieve the data for the current item.
+		item := it.Item()
+		val, err := item.ValueCopy(nil)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the value passes the filter func
+		if filterFn(val) {
+			return val, nil
+		}
+	}
+
+	return nil, storage.ErrNotFound
+}
+
 // create stores a value for the given key
 func (db *badgerDB) create(key []byte, val []byte) error {
 	db.wg.Add(1)
@@ -149,7 +206,7 @@ func (db *badgerDB) delete(key []byte) error {
 	if err := tx.Delete(key); err != nil {
 		// If the key is not found, return the ErrNotFound error.
 		if err == badger.ErrKeyNotFound {
-			return ErrNotFound
+			return storage.ErrNotFound
 		}
 
 		return err

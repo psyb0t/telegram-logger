@@ -3,29 +3,20 @@ package badgerdb
 import (
 	"encoding/json"
 
+	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
 	"github.com/psyb0t/telegram-logger/internal/pkg/types"
 )
 
-// UserRepositoryReader is an interface for reading
-// user data stored in the database.
-type UserRepositoryReader interface {
-	// Get retrieves a user by ID.
-	Get(id string) (types.User, error)
-
-	// GetAll retrieves all users from the database.
-	GetAll() ([]types.User, error)
-}
-
 // userRepositoryReader is a struct that implements the
-// UserRepositoryReader interface using a badgerDB instance.
+// storage.UserRepositoryReader interface using a badgerDB instance.
 type userRepositoryReader struct {
 	// db is a pointer to the underlying badgerDB instance.
 	db *badgerDB
 }
 
-// NewUserRepositoryReader creates and returns
+// newUserRepositoryReader creates and returns
 // a new userRepositoryReader instance.
-func NewUserRepositoryReader(db *badgerDB) UserRepositoryReader {
+func newUserRepositoryReader(db *badgerDB) storage.UserRepositoryReader {
 	return userRepositoryReader{db: db}
 }
 
@@ -34,7 +25,7 @@ func (r userRepositoryReader) Get(id string) (types.User, error) {
 	user := types.User{}
 
 	if id == "" {
-		return user, ErrEmptyID
+		return user, storage.ErrEmptyID
 	}
 
 	val, err := r.db.get(getUserKey(id))
@@ -72,4 +63,31 @@ func (r userRepositoryReader) GetAll() ([]types.User, error) {
 	}
 
 	return users, nil
+}
+
+// FindByTelegramChatID retrieves a user by its Telegram chat ID.
+func (r userRepositoryReader) FindByTelegramChatID(chatID int64) (types.User, error) {
+	var user types.User
+
+	// define filter function which unmarshals the value and checks if
+	// the Telegram chat ID matches the provided one
+	filterFn := func(val []byte) bool {
+		if err := json.Unmarshal(val, &user); err != nil {
+			return false
+		}
+
+		if user.TelegramChatID == chatID {
+			return true
+		}
+
+		return false
+	}
+
+	// do find
+	_, err := r.db.findByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
