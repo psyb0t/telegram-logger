@@ -19,7 +19,7 @@ func (a *app) telegramBotStartCommandHandler(chatID int64) error {
 	log.Debug("handling command")
 
 	user := types.User{
-		ID:             generateUserToken(),
+		ID:             generateUserID(),
 		TelegramChatID: chatID,
 	}
 

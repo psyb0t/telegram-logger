@@ -45,7 +45,10 @@ func (db *badgerDB) Open(dsn string) error {
 	var err error
 
 	// Open a connection to the database.
-	db.db, err = badger.Open(badger.DefaultOptions(dsn))
+	opts := badger.DefaultOptions(dsn)
+	opts.Logger = nil
+
+	db.db, err = badger.Open(opts)
 	if err != nil {
 		return err
 	}

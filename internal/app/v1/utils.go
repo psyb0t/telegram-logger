@@ -2,7 +2,7 @@ package v1
 
 import "github.com/google/uuid"
 
-// generateUserToken creates a unique user token
-func generateUserToken() string {
+// generateUserID creates a unique user ID
+func generateUserID() string {
 	return uuid.New().String()
 }
