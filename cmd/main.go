@@ -7,7 +7,7 @@ import (
 	"sync"
 	"syscall"
 
-	logger "github.com/psyb0t/glogger"
+	"github.com/psyb0t/glogger"
 	app "github.com/psyb0t/telegram-logger/internal/app/v1"
 )
 
@@ -20,8 +20,8 @@ func main() {
 	os.Setenv(serviceNameEnvVarName, serviceName)
 	defer os.Unsetenv(serviceNameEnvVarName)
 
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  "main",
 		Function: "main",
 	})

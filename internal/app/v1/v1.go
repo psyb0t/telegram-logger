@@ -5,10 +5,13 @@ import (
 	"os"
 	"sync"
 
-	logger "github.com/psyb0t/glogger"
+	"github.com/psyb0t/glogger"
 )
 
-const packageName = "v1"
+const (
+	serviceNameEnvVarName = "SERVICENAME"
+	packageName           = "v1"
+)
 
 // Run starts the app in a separate goroutine and waits for it to stop.
 // It initializes a logger and reads in a configuration file.
@@ -20,8 +23,8 @@ const packageName = "v1"
 //
 // Returns an error if the app stopped with an error or if there was an error when initializing the config.
 func Run(parentCtx context.Context) error {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Function: "Run",
 	})
@@ -33,7 +36,7 @@ func Run(parentCtx context.Context) error {
 		return err
 	}
 
-	logger.SetLogLevel(logger.StrToLogLevel(cfg.LogLevel))
+	glogger.SetLogLevel(glogger.StrToLogLevel(cfg.LogLevel))
 
 	ctx, cancelFunc := context.WithCancel(parentCtx)
 	defer cancelFunc()

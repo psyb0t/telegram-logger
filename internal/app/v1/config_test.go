@@ -18,8 +18,15 @@ func TestNewConfig(t *testing.T) {
 			configFile:  "./.fixture/valid-config.yml",
 			expectError: false,
 			expectedValue: config{
-				ListenAddress: "0.0.0.0:80",
-				LogLevel:      "info",
+				ListenAddress:    "0.0.0.0:8080",
+				LogLevel:         "debug",
+				TelegramBotToken: "",
+				Storage: storageConfig{
+					Type: "badgerDB",
+					BadgerDB: storageBadgerDBConfig{
+						DSN: "/path/to/db/dir",
+					},
+				},
 			},
 		},
 		{

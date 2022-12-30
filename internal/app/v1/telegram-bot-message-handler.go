@@ -5,7 +5,7 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	logger "github.com/psyb0t/glogger"
+	"github.com/psyb0t/glogger"
 )
 
 type telegramBotCommand string
@@ -16,8 +16,8 @@ const (
 )
 
 func (a *app) telegramBotMessageHandler() error {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Receiver: "app",
 		Function: "telegramBotMessageHandler",
@@ -56,15 +56,31 @@ func (a *app) telegramBotMessageHandler() error {
 }
 
 func (a *app) telegramBotHandleStartCommand(chatID int64) error {
-	msg := tgbotapi.NewMessage(chatID, "cets mai place sa dai start")
-	_, err := a.telegramBotAPI.Send(msg)
+	/*
+		log := glogger.New(glogger.Caller{
+			Service: os.Getenv(serviceNameEnvVarName),
+			Package:  packageName,
+			Receiver: "app",
+			Function: "telegramBotHandleStartCommand",
+		})
 
-	return err
+		return err
+	*/
+
+	return nil
 }
 
 func (a *app) telegramBotHandleStopCommand(chatID int64) error {
-	msg := tgbotapi.NewMessage(chatID, "cets mai place sa dai stop")
-	_, err := a.telegramBotAPI.Send(msg)
+	/*
+		log := glogger.New(glogger.Caller{
+			Service: os.Getenv(serviceNameEnvVarName),
+			Package:  packageName,
+			Receiver: "app",
+			Function: "telegramBotHandleStopCommand",
+		})
 
-	return err
+		return err
+	*/
+
+	return nil
 }

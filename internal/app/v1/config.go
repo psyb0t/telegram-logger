@@ -14,10 +14,26 @@ const (
 	defaultLogLevel      = "debug"
 )
 
+type storageType string
+
+const (
+	storageTypeBadgerDB storageType = "badgerDB"
+)
+
+type storageBadgerDBConfig struct {
+	DSN string `yaml:"dsn"`
+}
+
+type storageConfig struct {
+	Type     storageType           `yaml:"type" validate:"required"`
+	BadgerDB storageBadgerDBConfig `yaml:"badgerDB"`
+}
+
 type config struct {
-	ListenAddress    string `yaml:"listenAddress" validate:"hostname_port"`
-	LogLevel         string `yaml:"logLevel"`
-	TelegramBotToken string `mapstructure:"telegramBotToken"`
+	ListenAddress    string        `yaml:"listenAddress" validate:"hostname_port"`
+	LogLevel         string        `yaml:"logLevel"`
+	TelegramBotToken string        `yaml:"telegramBotToken"`
+	Storage          storageConfig `yaml:"storage"`
 }
 
 func newConfig() (config, error) {

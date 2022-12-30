@@ -6,10 +6,13 @@ import (
 	"os"
 	"sync"
 
+	"github.com/pkg/errors"
+	"github.com/psyb0t/glogger"
+	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
+	"github.com/psyb0t/telegram-logger/internal/pkg/storage/badgerdb"
 	"github.com/valyala/fasthttp"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	logger "github.com/psyb0t/glogger"
 )
 
 type app struct {
@@ -18,11 +21,12 @@ type app struct {
 	config         config
 	httpServer     fasthttp.Server
 	telegramBotAPI *tgbotapi.BotAPI
+	db             storage.Storage
 }
 
 func newApp(parentCtx context.Context, cfg config) (*app, error) {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Function: "newApp",
 	})
@@ -45,9 +49,16 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 		return nil, err
 	}
 
-	// bot.Debug = true
+	// a.telegramBotAPI.Debug = true
 
 	log.Debug(fmt.Sprintf("Authorized on telegram account %s", a.telegramBotAPI.Self.UserName))
+
+	log.Info("setting up the database")
+	if err := a.setupDatabase(); err != nil {
+		log.Error("an error occurred when setting up the database", err)
+
+		return nil, err
+	}
 
 	log.Info("setting up HTTP server")
 	a.httpServer = fasthttp.Server{
@@ -55,25 +66,44 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 		GetOnly:               false,
 		NoDefaultServerHeader: true,
 		NoDefaultDate:         true,
-		MaxRequestBodySize:    50 * 1024 * 1024, // 50mb
-		ReadBufferSize:        1024 * 1024,      // 1mb
+		MaxRequestBodySize:    1 * 1024 * 1024, // 1mb
+		ReadBufferSize:        1024 * 1024,     // 1mb
 	}
 
 	return a, nil
 }
 
+func (a *app) setupDatabase() error {
+	var err error
+
+	switch a.config.Storage.Type {
+	case storageTypeBadgerDB:
+		a.db, err = badgerdb.New(a.ctx)
+	default:
+		return ErrUnsupportedStorageType
+	}
+
+	return err
+}
+
 func (a *app) start() error {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Receiver: "app",
 		Function: "start",
 	})
 
 	defer a.cleanup()
+	defer a.cancelFunc()
 
 	var err error
 	var wg sync.WaitGroup
+
+	log.Info("opening the database connection")
+	if err = a.db.Open(a.config.Storage.BadgerDB.DSN); err != nil {
+		return errors.Wrap(ErrUnableToOpenDatabaseConnection, err.Error())
+	}
 
 	wg.Add(1)
 	errCh := make(chan error, 1)
@@ -94,6 +124,9 @@ func (a *app) start() error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+
+		log.Info("starting the Telegram bot message handler")
+		defer log.Info("Telegram bot message handler stopped")
 
 		err := a.telegramBotMessageHandler()
 		if errCh != nil {
@@ -125,12 +158,26 @@ func (a *app) start() error {
 }
 
 func (a *app) stop() {
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
+		Package:  packageName,
+		Receiver: "app",
+		Function: "stop",
+	})
+
+	log.Debug("cancelling app context")
 	a.cancelFunc()
 }
 
+/*
+func (a *app) healthCheck() error {
+	return nil
+}
+*/
+
 func (a *app) cleanup() {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Receiver: "app",
 		Function: "cleanup",
@@ -138,4 +185,9 @@ func (a *app) cleanup() {
 
 	log.Info("cleanup started")
 	defer log.Info("cleanup complete")
+
+	log.Info("closing the database connection")
+	if err := a.db.Close(); err != nil {
+		log.Error("error when closing the database connection", err)
+	}
 }
