@@ -56,11 +56,18 @@ func (a *app) telegramBotMessageHandler() error {
 	}
 }
 
-func (a *app) telegramBotSendMessage(user types.User, message string) error {
-	msg := tgbotapi.NewMessage(user.TelegramChatID, message)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+const telegramBotWelcomeMessageTpl = `Welcome!
+Here's your auth token: %s`
 
-	_, err := a.telegramBotAPI.Send(msg)
+func (a *app) telegramBotSendWelcomeMessage(user types.User) error {
+	msg := fmt.Sprintf(telegramBotWelcomeMessageTpl, user.ID)
+
+	return a.telegramBotSendMessage(user, msg)
+}
+
+func (a *app) telegramBotSendMessage(user types.User, msg string) error {
+	m := tgbotapi.NewMessage(user.TelegramChatID, msg)
+	_, err := a.telegramBotAPI.Send(m)
 
 	return err
 }

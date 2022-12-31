@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/psyb0t/glogger"
@@ -25,17 +24,15 @@ func (a *app) telegramBotStartCommandHandler(chatID int64) error {
 
 	log.Debug("creating user", user)
 
+	// remove any other existing users with the given chatID
+
 	if err := a.db.GetUserRepositoryWriter().Create(user); err != nil {
 		log.Error("error when creating user", err)
 
 		return err
 	}
 
-	messageText := fmt.Sprintf(`# Title
-	Token: *%s*
-	`, user.ID)
-
-	if err := a.telegramBotSendMessage(user, messageText); err != nil {
+	if err := a.telegramBotSendWelcomeMessage(user); err != nil {
 		log.Error("could not send telegram message", err)
 
 		return err
