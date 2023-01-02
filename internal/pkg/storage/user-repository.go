@@ -24,6 +24,7 @@ type UserRepositoryWriter interface {
 	// Delete removes a user from the database by ID.
 	Delete(id string) error
 
-	// DeleteByTelegramChatID removes a user from the database by Telegram chat ID.
-	DeleteByTelegramChatID(chatID int64) error
+	// DeleteAllByTelegramChatID removes all users from the
+	// database matching the given Telegram chat ID.
+	DeleteAllByTelegramChatID(chatID int64) error
 }

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/psyb0t/glogger"
+	"github.com/psyb0t/telegram-logger/internal/pkg/types"
 )
 
 func (a *app) telegramBotStopCommandHandler(chatID int64) error {
@@ -16,20 +17,27 @@ func (a *app) telegramBotStopCommandHandler(chatID int64) error {
 
 	log.Debug("handling command")
 
-	log.Debug("finding user by telegram chat ID", chatID)
-	user, err := a.db.GetUserRepositoryReader().GetByTelegramChatID(chatID)
+	// define errMsg which is used to send a generic message to
+	// the sender of the command via telegram when an error occurs
+	// in the deferred function
+	errMsg := ""
+	defer func() {
+		if errMsg != "" {
+			u := types.User{TelegramChatID: chatID}
+			if err := a.telegramBotSendMessage(u, errMsg); err != nil {
+				log.Error("error when sending telegram error message", err)
+			}
+		}
+	}()
+
+	log.Debug("deleting all users by Telegram chat ID", chatID)
+	err := a.db.GetUserRepositoryWriter().DeleteAllByTelegramChatID(chatID)
 	if err != nil {
-		log.Error("an error occurred when trying to find a user by Telegram chat ID", err)
+		errMsg = "an error occurred when trying to delete users"
+		log.Error(errMsg, err)
 
 		return err
 	}
 
-	log.Debug("deleting user", user)
-	if err = a.db.GetUserRepositoryWriter().Delete(user.ID); err != nil {
-		log.Error("an error occurred when trying to delete user", err)
-
-		return err
-	}
-
-	return err
+	return nil
 }

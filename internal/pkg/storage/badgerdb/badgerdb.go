@@ -144,11 +144,28 @@ func (db *badgerDB) getAllByPrefix(prefix []byte) ([][]byte, error) {
 	return result, nil
 }
 
-// getByPrefixAndFilterFunc retrieves the first key and its value from the db
+// getByPrefixAndFilterFunc retrieves the first n number of keys and their values from the db
 // based on the given key prefix and whose value also passes the filterFunc
-func (db *badgerDB) getByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc) ([]byte, []byte, error) {
+// if n < 0 then all matches get returned
+//
+// the results are returned as [][][]byte
+//
+// eg:
+//
+//	results := [][][]byte{
+//			[][]byte{[]byte("key1"), []byte("val1")},
+//			[][]byte{[]byte("key2"), []byte("val2")},
+//		}
+func (db *badgerDB) getByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc, n int) ([][][]byte, error) {
 	db.wg.Add(1)
 	defer db.wg.Done()
+
+	results := [][][]byte{}
+
+	// if desired num results is 0 then just return
+	if n == 0 {
+		return results, nil
+	}
 
 	// Start a new transaction.
 	tx := db.db.NewTransaction(false)
@@ -168,16 +185,23 @@ func (db *badgerDB) getByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc)
 
 		val, err := item.ValueCopy(nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		// Check if the value passes the filter func
-		if filterFn(item.KeyCopy(nil), val) {
-			return item.KeyCopy(nil), val, nil
+		key := item.KeyCopy(nil)
+		if filterFn(key, val) {
+			// add the result to the list of results
+			results = append(results, [][]byte{item.KeyCopy(nil), val})
+			// if num results is the desired one return
+			if len(results) == n {
+				return results, nil
+			}
+
 		}
 	}
 
-	return nil, nil, storage.ErrNotFound
+	return results, nil
 }
 
 // create stores a value for the given key

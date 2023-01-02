@@ -42,7 +42,7 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 	log.Info("setting up the telegram bot connection")
 
 	var err error
-	a.telegramBotAPI, err = tgbotapi.NewBotAPI(cfg.TelegramBotToken)
+	a.telegramBotAPI, err = tgbotapi.NewBotAPI(cfg.TelegramBot.Token)
 	if err != nil {
 		log.Error("an error occurred when setting up the telegram bot connection", err)
 

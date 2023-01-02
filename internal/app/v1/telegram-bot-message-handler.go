@@ -14,6 +14,7 @@ type telegramBotCommand string
 const (
 	telegramBotStartCommand telegramBotCommand = "/start"
 	telegramBotStopCommand  telegramBotCommand = "/stop"
+	telegramBotGetAllUsers  telegramBotCommand = "/getAllUsers"
 )
 
 func (a *app) telegramBotMessageHandler() error {
@@ -35,19 +36,26 @@ func (a *app) telegramBotMessageHandler() error {
 			return a.ctx.Err()
 		case update := <-updates:
 			if update.Message != nil {
+				chatID := update.Message.Chat.ID
+
 				log.Debug(fmt.Sprintf("telegram message received: chat id: %d - username: %s - message: %s",
-					update.Message.Chat.ID, update.Message.From.UserName, update.Message.Text))
+					chatID, update.Message.From.UserName, update.Message.Text))
 
 				switch telegramBotCommand(update.Message.Text) {
 				case telegramBotStartCommand:
-					err := a.telegramBotStartCommandHandler(update.Message.Chat.ID)
+					err := a.telegramBotStartCommandHandler(chatID)
 					if err != nil {
-						return err
+						log.Error("an error occurred when handling start the command", err)
 					}
 				case telegramBotStopCommand:
-					err := a.telegramBotStopCommandHandler(update.Message.Chat.ID)
+					err := a.telegramBotStopCommandHandler(chatID)
 					if err != nil {
-						return err
+						log.Error("an error occurred when handling the stop command", err)
+					}
+				case telegramBotGetAllUsers:
+					err := a.telegramBotGetAllUsersCommandHandler(chatID)
+					if err != nil {
+						log.Error("an error occurred when handling the get all users command", err)
 					}
 				default:
 				}
@@ -56,18 +64,13 @@ func (a *app) telegramBotMessageHandler() error {
 	}
 }
 
-const telegramBotWelcomeMessageTpl = `Welcome!
-Here's your ID: %s`
-
-func (a *app) telegramBotSendWelcomeMessage(user types.User) error {
-	msg := fmt.Sprintf(telegramBotWelcomeMessageTpl, user.ID)
-
-	return a.telegramBotSendMessage(user, msg)
-}
-
 func (a *app) telegramBotSendMessage(user types.User, msg string) error {
 	m := tgbotapi.NewMessage(user.TelegramChatID, msg)
 	_, err := a.telegramBotAPI.Send(m)
 
 	return err
+}
+
+func (a *app) telegramBotUserIsSuperUser(chatID int64) bool {
+	return chatID == a.config.TelegramBot.SuperuserChatID
 }

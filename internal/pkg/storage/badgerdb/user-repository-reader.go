@@ -65,7 +65,7 @@ func (r userRepositoryReader) GetAll() ([]types.User, error) {
 	return users, nil
 }
 
-// GetByTelegramChatID retrieves a user by its Telegram chat ID.
+// GetByTelegramChatID retrieves the first user found by its Telegram chat ID.
 func (r userRepositoryReader) GetByTelegramChatID(chatID int64) (types.User, error) {
 	var user types.User
 	if chatID == 0 {
@@ -87,7 +87,7 @@ func (r userRepositoryReader) GetByTelegramChatID(chatID int64) (types.User, err
 	}
 
 	// do get
-	_, _, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
+	_, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn, 1)
 	if err != nil {
 		return user, err
 	}

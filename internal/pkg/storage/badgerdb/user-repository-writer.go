@@ -48,8 +48,9 @@ func (r userRepositoryWriter) Delete(id string) error {
 	return r.db.delete(getUserKey(id))
 }
 
-// DeleteByTelegramChatID removes a user from the database by Telegram chat ID.
-func (r userRepositoryWriter) DeleteByTelegramChatID(chatID int64) error {
+// DeleteAllByTelegramChatID removes all users from the database
+// matching the given Telegram chat ID.
+func (r userRepositoryWriter) DeleteAllByTelegramChatID(chatID int64) error {
 	if chatID == 0 {
 		return storage.ErrEmptyTelegramChatID
 	}
@@ -69,11 +70,18 @@ func (r userRepositoryWriter) DeleteByTelegramChatID(chatID int64) error {
 		return false
 	}
 
-	// find key to delete
-	key, _, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
+	// find users to delete
+	results, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn, -1)
 	if err != nil {
 		return err
 	}
 
-	return r.db.delete(key)
+	for _, kv := range results {
+		key := kv[0]
+		if err := r.db.delete(key); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

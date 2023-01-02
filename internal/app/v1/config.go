@@ -29,11 +29,16 @@ type storageConfig struct {
 	BadgerDB storageBadgerDBConfig `yaml:"badgerDB"`
 }
 
+type telegramBotConfig struct {
+	Token           string `yaml:"token"`
+	SuperuserChatID int64  `yaml:"superuserChatID"`
+}
+
 type config struct {
-	ListenAddress    string        `yaml:"listenAddress" validate:"hostname_port"`
-	LogLevel         string        `yaml:"logLevel"`
-	TelegramBotToken string        `yaml:"telegramBotToken"`
-	Storage          storageConfig `yaml:"storage"`
+	ListenAddress string            `yaml:"listenAddress" validate:"hostname_port"`
+	LogLevel      string            `yaml:"logLevel"`
+	TelegramBot   telegramBotConfig `yaml:"telegramBot"`
+	Storage       storageConfig     `yaml:"storage"`
 }
 
 func newConfig() (config, error) {
@@ -43,9 +48,12 @@ func newConfig() (config, error) {
 	}
 
 	defaults := map[string]interface{}{
-		"listenAddress":    defaultListenAddress,
-		"logLevel":         defaultLogLevel,
-		"telegramBotToken": "",
+		"listenAddress": defaultListenAddress,
+		"logLevel":      defaultLogLevel,
+		"telegramBot": map[string]interface{}{
+			"token":           "",
+			"superuserChatID": 0,
+		},
 	}
 
 	cfg := config{}
