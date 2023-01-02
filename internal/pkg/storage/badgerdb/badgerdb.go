@@ -11,10 +11,11 @@ import (
 
 const prefixUserKey = "user-"
 
-// filterFunc is a function that accepts a database []byte value as a parameter
+// filterFunc is a function that accepts a key and its value as parameters
+// used for filtering results retrieved from the database
 //
 // returns a boolean value. true if filter passed, false if not.
-type filterFunc func(val []byte) bool
+type filterFunc func(key, val []byte) bool
 
 // badgerDB is a struct that implements the Storage interface using a BadgerDB database.
 type badgerDB struct {
@@ -143,9 +144,9 @@ func (db *badgerDB) getAllByPrefix(prefix []byte) ([][]byte, error) {
 	return result, nil
 }
 
-// findByPrefixAndFilterFunc retrieve a value from a key prefixed with prefix
-// which also passes the given filterFunc
-func (db *badgerDB) findByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc) ([]byte, error) {
+// getByPrefixAndFilterFunc retrieves the first key and its value from the db
+// based on the given key prefix and whose value also passes the filterFunc
+func (db *badgerDB) getByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc) ([]byte, []byte, error) {
 	db.wg.Add(1)
 	defer db.wg.Done()
 
@@ -164,18 +165,19 @@ func (db *badgerDB) findByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc
 	for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 		// Retrieve the data for the current item.
 		item := it.Item()
+
 		val, err := item.ValueCopy(nil)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		// Check if the value passes the filter func
-		if filterFn(val) {
-			return val, nil
+		if filterFn(item.KeyCopy(nil), val) {
+			return item.KeyCopy(nil), val, nil
 		}
 	}
 
-	return nil, storage.ErrNotFound
+	return nil, nil, storage.ErrNotFound
 }
 
 // create stores a value for the given key

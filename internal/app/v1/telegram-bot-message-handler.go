@@ -57,7 +57,7 @@ func (a *app) telegramBotMessageHandler() error {
 }
 
 const telegramBotWelcomeMessageTpl = `Welcome!
-Here's your auth token: %s`
+Here's your ID: %s`
 
 func (a *app) telegramBotSendWelcomeMessage(user types.User) error {
 	msg := fmt.Sprintf(telegramBotWelcomeMessageTpl, user.ID)

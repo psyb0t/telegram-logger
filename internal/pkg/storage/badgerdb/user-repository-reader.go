@@ -65,13 +65,16 @@ func (r userRepositoryReader) GetAll() ([]types.User, error) {
 	return users, nil
 }
 
-// FindByTelegramChatID retrieves a user by its Telegram chat ID.
-func (r userRepositoryReader) FindByTelegramChatID(chatID int64) (types.User, error) {
+// GetByTelegramChatID retrieves a user by its Telegram chat ID.
+func (r userRepositoryReader) GetByTelegramChatID(chatID int64) (types.User, error) {
 	var user types.User
+	if chatID == 0 {
+		return user, storage.ErrEmptyTelegramChatID
+	}
 
 	// define filter function which unmarshals the value and checks if
 	// the Telegram chat ID matches the provided one
-	filterFn := func(val []byte) bool {
+	filterFn := func(key, val []byte) bool {
 		if err := json.Unmarshal(val, &user); err != nil {
 			return false
 		}
@@ -83,8 +86,8 @@ func (r userRepositoryReader) FindByTelegramChatID(chatID int64) (types.User, er
 		return false
 	}
 
-	// do find
-	_, err := r.db.findByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
+	// do get
+	_, _, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
 	if err != nil {
 		return user, err
 	}

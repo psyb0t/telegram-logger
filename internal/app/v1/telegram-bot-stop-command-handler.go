@@ -17,7 +17,7 @@ func (a *app) telegramBotStopCommandHandler(chatID int64) error {
 	log.Debug("handling command")
 
 	log.Debug("finding user by telegram chat ID", chatID)
-	user, err := a.db.GetUserRepositoryReader().FindByTelegramChatID(chatID)
+	user, err := a.db.GetUserRepositoryReader().GetByTelegramChatID(chatID)
 	if err != nil {
 		log.Error("an error occurred when trying to find a user by Telegram chat ID", err)
 

@@ -11,8 +11,8 @@ type UserRepositoryReader interface {
 	// GetAll retrieves all users from the database.
 	GetAll() ([]types.User, error)
 
-	// FindByTelegramChatID retrieves a user by its Telegram chat ID.
-	FindByTelegramChatID(chatID int64) (types.User, error)
+	// GetByTelegramChatID retrieves a user by its Telegram chat ID.
+	GetByTelegramChatID(chatID int64) (types.User, error)
 }
 
 // UserRepositoryWriter is an interface for writing
@@ -23,4 +23,7 @@ type UserRepositoryWriter interface {
 
 	// Delete removes a user from the database by ID.
 	Delete(id string) error
+
+	// DeleteByTelegramChatID removes a user from the database by Telegram chat ID.
+	DeleteByTelegramChatID(chatID int64) error
 }

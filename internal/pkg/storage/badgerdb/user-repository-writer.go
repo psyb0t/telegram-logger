@@ -47,3 +47,33 @@ func (r userRepositoryWriter) Delete(id string) error {
 	// Delete the user data from the database using the prefixed provided ID as the key.
 	return r.db.delete(getUserKey(id))
 }
+
+// DeleteByTelegramChatID removes a user from the database by Telegram chat ID.
+func (r userRepositoryWriter) DeleteByTelegramChatID(chatID int64) error {
+	if chatID == 0 {
+		return storage.ErrEmptyTelegramChatID
+	}
+
+	// define filter function which unmarshals the value and checks if
+	// the Telegram chat ID matches the provided one
+	filterFn := func(key, val []byte) bool {
+		var user types.User
+		if err := json.Unmarshal(val, &user); err != nil {
+			return false
+		}
+
+		if user.TelegramChatID == chatID {
+			return true
+		}
+
+		return false
+	}
+
+	// find key to delete
+	key, _, err := r.db.getByPrefixAndFilterFunc([]byte(prefixUserKey), filterFn)
+	if err != nil {
+		return err
+	}
+
+	return r.db.delete(key)
+}
