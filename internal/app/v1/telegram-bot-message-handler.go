@@ -45,17 +45,17 @@ func (a *app) telegramBotMessageHandler() error {
 				case telegramBotStartCommand:
 					err := a.telegramBotStartCommandHandler(chatID)
 					if err != nil {
-						log.Error("an error occurred when handling start the command", err)
+						log.Err(err).Error("an error occurred when handling start the command")
 					}
 				case telegramBotStopCommand:
 					err := a.telegramBotStopCommandHandler(chatID)
 					if err != nil {
-						log.Error("an error occurred when handling the stop command", err)
+						log.Err(err).Error("an error occurred when handling the stop command")
 					}
 				case telegramBotGetAllUsers:
 					err := a.telegramBotGetAllUsersCommandHandler(chatID)
 					if err != nil {
-						log.Error("an error occurred when handling the get all users command", err)
+						log.Err(err).Error("an error occurred when handling the get all users command")
 					}
 				default:
 				}

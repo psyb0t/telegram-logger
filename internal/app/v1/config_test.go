@@ -19,7 +19,10 @@ func TestNewConfig(t *testing.T) {
 			expectError: false,
 			expectedValue: config{
 				ListenAddress: "0.0.0.0:8080",
-				LogLevel:      "debug",
+				Logger: loggerConfig{
+					Level:  "debug",
+					Format: "json",
+				},
 				TelegramBot: telegramBotConfig{
 					Token:           "",
 					SuperuserChatID: 0,

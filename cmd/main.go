@@ -50,7 +50,7 @@ func main() {
 		log.Info("received interrupt signal")
 	case err := <-errCh:
 		if err != nil {
-			log.Info("app encountered an error:", err)
+			log.Err(err).Error("app encountered an error")
 		}
 	}
 

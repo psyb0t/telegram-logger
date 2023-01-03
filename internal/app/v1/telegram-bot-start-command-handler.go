@@ -35,33 +35,33 @@ func (a *app) telegramBotStartCommandHandler(chatID int64) error {
 	defer func() {
 		if errMsg != "" {
 			if err := a.telegramBotSendMessage(user, errMsg); err != nil {
-				log.Error("error when sending telegram error message", err)
+				log.Err(err).Error("error when sending telegram error message")
 			}
 		}
 	}()
 
-	log.Debug("deleting all users matching the telegram chat id", chatID)
+	log.Data("chatID", chatID).Debug("deleting all users matching the telegram chat id")
 	err := a.db.GetUserRepositoryWriter().DeleteAllByTelegramChatID(chatID)
 	if err != nil {
 		errMsg = "error when cleaning up the database by telegram chat ID"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}
 
-	log.Debug("creating user", user)
+	log.Data("user", user).Debug("creating user")
 	if err := a.db.GetUserRepositoryWriter().Create(user); err != nil {
 		errMsg = "error when creating user"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}
 
-	log.Debug("sending welcome message to user", user)
+	log.Data("user", user).Debug("sending welcome message to user")
 	msg := fmt.Sprintf(telegramBotWelcomeMessageTpl, user.ID)
 	if err := a.telegramBotSendMessage(user, msg); err != nil {
 		errMsg = "could not send telegram welcome message"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}

@@ -1,29 +1,55 @@
 package v1
 
 import (
+	"encoding/json"
+	"os"
+
 	"github.com/fasthttp/router"
+	"github.com/psyb0t/glogger"
 	"github.com/valyala/fasthttp"
+)
+
+const (
+	contentTypeTextPlain       = "text/plain"
+	contentTypeApplicationJSON = "application/json"
 )
 
 func (a *app) getHTTPRequestHandler() fasthttp.RequestHandler {
 	r := router.New()
-	r.GET("/", a.rootHTTPHandler)
+	r.POST("/", a.rootHTTPHandler)
 
-	requestHandler := r.Handler
+	return r.Handler
+}
 
-	/*
-		// last in first out
-		requestHandler = middleware.LogResponse(requestHandler)
-		requestHandler = middleware.LogRequest(requestHandler)
+func (a *app) returnHTTPResponseString(ctx *fasthttp.RequestCtx, statusCode int, body string) {
+	a.returnHTTPResponse(ctx, statusCode, contentTypeTextPlain, []byte(body))
+}
 
-		if a.config.Tracer.Enabled {
-			requestHandler = middleware.TraceID(requestHandler)
-		}
+func (a *app) returnHTTPResponseJSON(ctx *fasthttp.RequestCtx, statusCode int, data interface{}) {
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
+		Package:  packageName,
+		Receiver: "app",
+		Function: "returnHTTPResponseJSON",
+	})
 
-		requestHandler = middleware.RequestID(requestHandler)
-		requestHandler = middleware.RealIP(requestHandler)
-		requestHandler = corsHandler.Handler(requestHandler)
-	*/
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Err(err).Error("could json.Marshal data")
 
-	return requestHandler
+		a.returnHTTPResponseString(ctx, fasthttp.StatusInternalServerError,
+			fasthttp.StatusMessage(fasthttp.StatusInternalServerError))
+
+		return
+	}
+
+	a.returnHTTPResponse(ctx, statusCode, contentTypeApplicationJSON, jsonData)
+}
+
+func (a *app) returnHTTPResponse(ctx *fasthttp.RequestCtx,
+	statusCode int, contentType string, body []byte) {
+
+	ctx.SetContentType(contentType)
+	ctx.SetStatusCode(statusCode)
+	ctx.SetBody(body)
 }

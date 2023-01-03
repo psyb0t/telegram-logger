@@ -27,16 +27,16 @@ func (a *app) telegramBotGetAllUsersCommandHandler(chatID int64) error {
 	defer func() {
 		if errMsg != "" {
 			if err := a.telegramBotSendMessage(requestUser, errMsg); err != nil {
-				log.Error("error when sending telegram error message", err)
+				log.Err(err).Error("error when sending telegram error message")
 			}
 		}
 	}()
 
-	log.Debug("checking if the user is superadmin", chatID)
+	log.Data("chatID", chatID).Debug("checking if the user is superadmin")
 	if !a.telegramBotUserIsSuperUser(chatID) {
 		err := ErrUnauthorizedToUseTelegramBotCommand
 		errMsg = err.Error()
-		log.Error(err, chatID)
+		log.Data("chatID", chatID).Err(err).Error(errMsg)
 
 		return err
 	}
@@ -45,16 +45,16 @@ func (a *app) telegramBotGetAllUsersCommandHandler(chatID int64) error {
 	allUsers, err := a.db.GetUserRepositoryReader().GetAll()
 	if err != nil {
 		errMsg = "an error occurred when trying to get all users"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}
 
-	log.Debug("serializing the resulting users", allUsers)
+	log.Data("allUsers", allUsers).Debug("serializing the resulting users")
 	allUsersJSON, err := json.MarshalIndent(allUsers, "", " ")
 	if err != nil {
 		errMsg = "error when serializing the resulting users"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}
@@ -62,7 +62,7 @@ func (a *app) telegramBotGetAllUsersCommandHandler(chatID int64) error {
 	log.Debug("sending the response to the user")
 	if err := a.telegramBotSendMessage(requestUser, string(allUsersJSON)); err != nil {
 		errMsg = "could not send telegram message"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}

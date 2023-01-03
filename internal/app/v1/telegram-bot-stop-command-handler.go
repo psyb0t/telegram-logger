@@ -25,16 +25,16 @@ func (a *app) telegramBotStopCommandHandler(chatID int64) error {
 		if errMsg != "" {
 			u := types.User{TelegramChatID: chatID}
 			if err := a.telegramBotSendMessage(u, errMsg); err != nil {
-				log.Error("error when sending telegram error message", err)
+				log.Err(err).Error("error when sending telegram error message")
 			}
 		}
 	}()
 
-	log.Debug("deleting all users by Telegram chat ID", chatID)
+	log.Data("chatID", chatID).Debug("deleting all users by Telegram chat ID")
 	err := a.db.GetUserRepositoryWriter().DeleteAllByTelegramChatID(chatID)
 	if err != nil {
 		errMsg = "an error occurred when trying to delete users"
-		log.Error(errMsg, err)
+		log.Err(err).Error(errMsg)
 
 		return err
 	}

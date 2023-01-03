@@ -1,5 +1,7 @@
 listenAddress: 0.0.0.0:8080
-logLevel: debug
+logger:
+  level: debug
+  format: json
 telegramBotToken:
 storage:
   type: badgerDB

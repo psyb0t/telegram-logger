@@ -34,9 +34,14 @@ type telegramBotConfig struct {
 	SuperuserChatID int64  `yaml:"superuserChatID"`
 }
 
+type loggerConfig struct {
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
+}
+
 type config struct {
 	ListenAddress string            `yaml:"listenAddress" validate:"hostname_port"`
-	LogLevel      string            `yaml:"logLevel"`
+	Logger        loggerConfig      `yaml:"logger"`
 	TelegramBot   telegramBotConfig `yaml:"telegramBot"`
 	Storage       storageConfig     `yaml:"storage"`
 }

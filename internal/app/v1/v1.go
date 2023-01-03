@@ -31,19 +31,21 @@ func Run(parentCtx context.Context) error {
 
 	cfg, err := newConfig()
 	if err != nil {
-		log.Error("error when initializing config", err)
+		log.Err(err).Error("error when initializing config")
 
 		return err
 	}
 
-	glogger.SetLogLevel(glogger.StrToLogLevel(cfg.LogLevel))
+	glogger.SetLogLevel(glogger.StrToLogLevel(cfg.Logger.Level))
+	glogger.SetLogFormat(glogger.StrToLogFormat(cfg.Logger.Format))
 
 	ctx, cancelFunc := context.WithCancel(parentCtx)
 	defer cancelFunc()
 
+	log.Debug("initializing app")
 	a, err := newApp(ctx, cfg)
 	if err != nil {
-		log.Error("error when initializing app", err)
+		log.Err(err).Error("error when initializing app")
 
 		return err
 	}
@@ -56,7 +58,7 @@ func Run(parentCtx context.Context) error {
 
 		log.Info("starting app")
 		if err := a.start(); err != nil {
-			log.Error("app stopped with error", err)
+			log.Err(err).Error("app stopped with error")
 
 			return
 		}

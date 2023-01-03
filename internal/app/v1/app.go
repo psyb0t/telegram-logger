@@ -44,7 +44,7 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 	var err error
 	a.telegramBotAPI, err = tgbotapi.NewBotAPI(cfg.TelegramBot.Token)
 	if err != nil {
-		log.Error("an error occurred when setting up the telegram bot connection", err)
+		log.Err(err).Error("an error occurred when setting up the telegram bot connection")
 
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 
 	log.Info("setting up the database")
 	if err := a.setupDatabase(); err != nil {
-		log.Error("an error occurred when setting up the database", err)
+		log.Err(err).Error("an error occurred when setting up the database")
 
 		return nil, err
 	}
@@ -116,11 +116,11 @@ func (a *app) start() error {
 		err = a.ctx.Err()
 	case err = <-httpServerErrCh:
 		if err != nil {
-			log.Info("HTTP server encountered an error", err)
+			log.Err(err).Error("HTTP server encountered an error")
 		}
 	case err = <-telegramBotMessageHandlerErrCh:
 		if err != nil {
-			log.Info("Telegram bot message handler encountered an error", err)
+			log.Err(err).Error("Telegram bot message handler encountered an error")
 		}
 	}
 
@@ -198,11 +198,11 @@ func (a *app) cleanup() {
 
 	log.Info("gracefully shutting down the HTTP sever")
 	if err := a.httpServer.Shutdown(); err != nil {
-		log.Info("HTTP server graceful shutdown failed:", err)
+		log.Err(err).Error("HTTP server graceful shutdown failed")
 	}
 
 	log.Info("closing the database connection")
 	if err := a.db.Close(); err != nil {
-		log.Error("error when closing the database connection", err)
+		log.Err(err).Error("error when closing the database connection")
 	}
 }
