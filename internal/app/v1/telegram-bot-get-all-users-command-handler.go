@@ -8,6 +8,14 @@ import (
 	"github.com/psyb0t/telegram-logger/internal/pkg/types"
 )
 
+// telegramBotGetAllUsersCommandHandler handles the get all users
+// command of the telegram bot.
+//
+// It checks if the user who sent the command is a superadmin and if they are,
+// it retrieves all the users from the database, serializes them and sends the
+// result to the sender of the command. If the user is not a superadmin or
+// there's an error when getting the users from the database or serializing
+// them, it sends an error message to the sender.
 func (a *app) telegramBotGetAllUsersCommandHandler(chatID int64) error {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),

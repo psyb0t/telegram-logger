@@ -15,6 +15,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// app contains the context, cancel function, config, HTTP server,
+// Telegram bot API, and database connection for the app.
 type app struct {
 	ctx            context.Context
 	cancelFunc     context.CancelFunc
@@ -24,6 +26,8 @@ type app struct {
 	db             storage.Storage
 }
 
+// newApp creates a new app struct and initializes the Telegram
+// bot connection and database. It also sets up the HTTP server.
 func newApp(parentCtx context.Context, cfg config) (*app, error) {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),
@@ -73,6 +77,8 @@ func newApp(parentCtx context.Context, cfg config) (*app, error) {
 	return a, nil
 }
 
+// sets up the database connection for the app based on the specified
+// storage type in the config.
 func (a *app) setupDatabase() error {
 	var err error
 
@@ -86,6 +92,12 @@ func (a *app) setupDatabase() error {
 	return err
 }
 
+// start starts the app by opening the database connection and starting the
+// HTTP server and Telegram bot message handler in separate goroutines.
+// It waits for either the context to be cancelled or for one of the goroutines
+// to return an error. If the context is cancelled, it sets the error to the
+// context's error. If one of the goroutines returns an error, it sets the
+// error to that error. It then stops the app and returns the error.
 func (a *app) start() error {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),
@@ -133,6 +145,9 @@ func (a *app) start() error {
 	return err
 }
 
+// startHTTPServer starts the HTTP server and waits for it to stop. If the
+// server returns an error, it is passed on to the calling function via
+// the provided error channel.
 func (a *app) startHTTPServer(wg *sync.WaitGroup, errCh chan<- error) {
 	defer wg.Done()
 	defer close(errCh)
@@ -150,6 +165,9 @@ func (a *app) startHTTPServer(wg *sync.WaitGroup, errCh chan<- error) {
 	errCh <- a.httpServer.ListenAndServe(a.config.ListenAddress)
 }
 
+// startTelegramBotMessageHandler starts the Telegram bot message handler
+// and waits for it to stop. If the message handler returns an error, it is
+// passed on to the calling function via the provided error channel.
 func (a *app) startTelegramBotMessageHandler(wg *sync.WaitGroup, errCh chan<- error) {
 	defer wg.Done()
 	defer close(errCh)
@@ -185,6 +203,8 @@ func (a *app) healthCheck() error {
 }
 */
 
+// cleanup gracefully shuts down the HTTP server and closes the
+// database connection.
 func (a *app) cleanup() {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),

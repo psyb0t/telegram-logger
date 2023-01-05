@@ -46,6 +46,13 @@ type config struct {
 	Storage       storageConfig     `yaml:"storage"`
 }
 
+// newConfig reads and parses the configuration file and returns a config
+// struct. It returns an error if there was an issue reading or
+// parsing the file or if the config struct field validation fails.
+//
+// Note: configparser uses viper with AutomaticEnv() meaning that
+// env vars such as LOGGER_LEVEL or TELEGRAMBOT_TOKEN will be used
+// over defaults and values set in the config file
 func newConfig() (config, error) {
 	configFile := os.Getenv(configFileEnvVarName)
 	if configFile == "" {
@@ -54,7 +61,10 @@ func newConfig() (config, error) {
 
 	defaults := map[string]interface{}{
 		"listenAddress": defaultListenAddress,
-		"logLevel":      defaultLogLevel,
+		"logger": map[string]interface{}{
+			"level":  "debug",
+			"format": "json",
+		},
 		"telegramBot": map[string]interface{}{
 			"token":           "",
 			"superuserChatID": 0,

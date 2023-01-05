@@ -14,6 +14,9 @@ const (
 	contentTypeApplicationJSON = "application/json"
 )
 
+// getHTTPRequestHandler returns an HTTP request handler for the app.
+// It handles requests by delegating to the appropriate handler function
+// based on the request method and path.
 func (a *app) getHTTPRequestHandler() fasthttp.RequestHandler {
 	r := router.New()
 	r.POST("/", a.rootHTTPHandler)
@@ -21,11 +24,19 @@ func (a *app) getHTTPRequestHandler() fasthttp.RequestHandler {
 	return r.Handler
 }
 
-func (a *app) returnHTTPResponseString(ctx *fasthttp.RequestCtx, statusCode int, body string) {
+// returnHTTPResponseString returns an HTTP response with the provided
+// status code and body as a string
+func (a *app) returnHTTPResponseString(
+	ctx *fasthttp.RequestCtx, statusCode int, body string,
+) {
 	a.returnHTTPResponse(ctx, statusCode, contentTypeTextPlain, []byte(body))
 }
 
-func (a *app) returnHTTPResponseJSON(ctx *fasthttp.RequestCtx, statusCode int, data interface{}) {
+// returnHTTPResponseJSON returns an HTTP response with the provided
+// status code, and body serialized as JSON.
+func (a *app) returnHTTPResponseJSON(
+	ctx *fasthttp.RequestCtx, statusCode int, data interface{},
+) {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
@@ -46,6 +57,8 @@ func (a *app) returnHTTPResponseJSON(ctx *fasthttp.RequestCtx, statusCode int, d
 	a.returnHTTPResponse(ctx, statusCode, contentTypeApplicationJSON, jsonData)
 }
 
+// returnHTTPResponse returns an HTTP response with the provided status code,
+// content type, and body.
 func (a *app) returnHTTPResponse(ctx *fasthttp.RequestCtx,
 	statusCode int, contentType string, body []byte) {
 

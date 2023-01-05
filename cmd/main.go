@@ -16,6 +16,11 @@ const (
 	serviceName           = "telegram-logger"
 )
 
+// main is the entry point of the application. It sets the service name
+// environment variable, creates a channel to receive os signals, creates
+// a context and wait group and starts the app. If the app returns an error
+// or an os signal is received, the context is cancelled and the wait group
+// is waited to finish.
 func main() {
 	os.Setenv(serviceNameEnvVarName, serviceName)
 	defer os.Unsetenv(serviceNameEnvVarName)

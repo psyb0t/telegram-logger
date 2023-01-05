@@ -17,6 +17,12 @@ const (
 	telegramBotGetAllUsers  telegramBotCommand = "/getAllUsers"
 )
 
+// telegramBotMessageHandler is responsible for handling incoming messages
+// from Telegram. It listens to a channel of updates and processes each
+// message as they come in. If the message is a command (e.g. "/start" or "/stop"),
+// it invokes the corresponding command handler function. If the message is
+// not a command, it does nothing.
+// This function should be run in a separate goroutine.
 func (a *app) telegramBotMessageHandler() error {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),

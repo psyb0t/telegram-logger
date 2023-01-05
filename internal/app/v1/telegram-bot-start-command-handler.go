@@ -13,6 +13,10 @@ const (
 Your ID is %s`
 )
 
+// telegramBotStartCommandHandler handles the telegramBotStartCommand command
+// received from a user via a telegram bot. It generates a unique ID for the
+// user and stores it in the database and it sends a welcome message to the
+// user, containing the unique ID.
 func (a *app) telegramBotStartCommandHandler(chatID int64) error {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),

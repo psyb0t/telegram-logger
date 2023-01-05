@@ -15,6 +15,11 @@ const (
 	headerNameXID = "X-ID"
 )
 
+// rootHTTPHandler handles HTTP requests to the root path. It gets the user
+// associated with the request based on the value of the X-ID header, parses
+// the JSON request body, builds a Telegram message string from the request,
+// and sends the message to the user via the Telegram bot. It returns an HTTP
+// response with the status code, header, and body serialized as JSON.
 func (a *app) rootHTTPHandler(ctx *fasthttp.RequestCtx) {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),
@@ -75,6 +80,9 @@ func (a *app) rootHTTPHandler(ctx *fasthttp.RequestCtx) {
 	a.returnHTTPResponseJSON(ctx, fasthttp.StatusOK, response)
 }
 
+// requestToTelegramMessageString builds a Telegram message string from a
+// types.Request struct. It returns the message string and an error if
+// there was an issue building the string.
 func requestToTelegramMessageString(request types.Request) (string, error) {
 	telegramMsg := ""
 	if request.Caller != "" {
