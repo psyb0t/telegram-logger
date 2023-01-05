@@ -2,8 +2,9 @@ package v1
 
 import (
 	"os"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewConfig(t *testing.T) {
@@ -62,16 +63,12 @@ func TestNewConfig(t *testing.T) {
 
 			actual, err := newConfig()
 			if test.expectError {
-				if err == nil {
-					t.Errorf("Expected error but got nil")
-
-					return
-				}
+				assert.Error(t, err)
+				return
 			}
 
-			if !reflect.DeepEqual(actual, test.expectedValue) {
-				t.Errorf("Expected %v but got %v", test.expectedValue, actual)
-			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expectedValue, actual)
 		})
 	}
 }
