@@ -1,2 +1,4 @@
 listenAddress: badaddress
-logLevel: info
+logger:
+  level: info
+  format: json

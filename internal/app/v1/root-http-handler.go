@@ -1,11 +1,13 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/psyb0t/glogger"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
+	"github.com/psyb0t/telegram-logger/pkg/types"
 	"github.com/valyala/fasthttp"
 )
 
@@ -34,28 +36,83 @@ func (a *app) rootHTTPHandler(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	/*
-		// define errMsg which is used to send a generic message to
-		// the sender of the command via telegram when an error occurs
-		// in the deferred function
-		errMsg := ""
-		defer func() {
-			if errMsg != "" {
-				if err := a.telegramBotSendMessage(user, errMsg); err != nil {
-					log.Error("error when sending telegram error message", err)
-				}
-			}
-		}()
-	*/
+	log.Debug("parsing JSON request body")
+	request := types.Request{}
+	if err := json.Unmarshal(ctx.Request.Body(), &request); err != nil {
+		log.Err(err).Error("could not parse JSON request body")
 
-	msg := `you got this shit
-	%s`
+		a.returnHTTPResponseJSON(ctx, fasthttp.StatusBadRequest,
+			types.Response{Error: err.Error()})
 
-	reqMsg := string(ctx.Request.Body())
-
-	if err := a.telegramBotSendMessage(user, fmt.Sprintf(msg, reqMsg)); err != nil {
-		log.Err(err).Error("there was an error when sending the message to the user")
+		return
 	}
 
-	a.returnHTTPResponseJSON(ctx, 200, nil)
+	log.Data("request", request).Debug("building telegram message string from request")
+	telegramMessage, err := requestToTelegramMessageString(request)
+	if err != nil {
+		log.Err(err).Error("an error occurred when building telegram message string from request")
+
+		a.returnHTTPResponseJSON(ctx, fasthttp.StatusInternalServerError,
+			types.Response{Error: err.Error()})
+
+		return
+	}
+
+	log.Data("telegramMessage", telegramMessage).
+		Data("user", user).
+		Debug("sending message to the user")
+
+	if err := a.telegramBotSendMessage(user, telegramMessage); err != nil {
+		log.Err(err).Error("there was an error when sending the message to the user")
+
+		a.returnHTTPResponseJSON(ctx, fasthttp.StatusInternalServerError,
+			types.Response{Error: err.Error()})
+
+		return
+	}
+
+	response := types.Response{Message: "successfully sent log entry via Telegram"}
+	a.returnHTTPResponseJSON(ctx, fasthttp.StatusOK, response)
+}
+
+func requestToTelegramMessageString(request types.Request) (string, error) {
+	telegramMsg := ""
+	if request.Caller != "" {
+		telegramMsg += fmt.Sprintf("Caller: %s\n", request.Caller)
+	}
+
+	if request.Time != "" {
+		telegramMsg += fmt.Sprintf("Time: %s\n", request.Time)
+	}
+
+	if request.Level != "" {
+		telegramMsg += fmt.Sprintf("Level: %s\n", request.Level)
+	}
+
+	if request.RequestID != "" {
+		telegramMsg += fmt.Sprintf("RequestID: %s\n", request.RequestID)
+	}
+
+	if request.TraceID != "" {
+		telegramMsg += fmt.Sprintf("TraceID: %s\n", request.TraceID)
+	}
+
+	if request.SpanID != "" {
+		telegramMsg += fmt.Sprintf("SpanID: %s\n", request.SpanID)
+	}
+
+	if request.Message != "" {
+		telegramMsg += fmt.Sprintf("Message: %s\n", request.Message)
+	}
+
+	if request.Data != nil {
+		serializedData, err := json.Marshal(request.Data)
+		if err != nil {
+			return "", err
+		}
+
+		telegramMsg += fmt.Sprintf("Data: %s\n", serializedData)
+	}
+
+	return telegramMsg, nil
 }

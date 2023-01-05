@@ -1,1 +1,1 @@
-listenAddress 0.0.0.0:80 logLevel info
+listenAddress 0.0.0.0:80 logger level info
