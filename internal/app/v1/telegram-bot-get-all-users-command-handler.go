@@ -8,7 +8,7 @@ import (
 	"github.com/psyb0t/telegram-logger/internal/pkg/types"
 )
 
-// telegramBotGetAllUsersCommandHandler handles the get all users
+// telegramBotGetAllUsersCommandHandler handles the telegramBotGetAllUsers
 // command of the telegram bot.
 //
 // It checks if the user who sent the command is a superadmin and if they are,

@@ -9,10 +9,10 @@ dep: ## Get the dependencies + remove unused ones
 	@go mod download
 
 lint: ## Lint Golang files
-	@golint -set_exit_status $(PKG_LIST)
+	@golangci-lint run --timeout=30m0s
 
 build: dep ## Build the executable binary
-	@go build -o build/app cmd/*.go
+	@GO111MODULE=on CGO_ENABLED=0 go build -a -installsuffix cgo -o build/app cmd/*.go
 
 build-docker: ## Build the docker image via docker compose
 	@docker compose build

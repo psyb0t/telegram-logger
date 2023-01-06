@@ -1,0 +1,7 @@
+.vscode
+config.json
+config.yml
+build
+coverage.txt
+.env
+db
