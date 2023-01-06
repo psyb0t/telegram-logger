@@ -5,10 +5,13 @@ import (
 	"os"
 	"sync"
 
-	logger "github.com/psyb0t/glogger"
+	"github.com/psyb0t/glogger"
 )
 
-const packageName = "v1"
+const (
+	serviceNameEnvVarName = "SERVICENAME"
+	packageName           = "v1"
+)
 
 // Run starts the app in a separate goroutine and waits for it to stop.
 // It initializes a logger and reads in a configuration file.
@@ -20,27 +23,29 @@ const packageName = "v1"
 //
 // Returns an error if the app stopped with an error or if there was an error when initializing the config.
 func Run(parentCtx context.Context) error {
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  packageName,
 		Function: "Run",
 	})
 
 	cfg, err := newConfig()
 	if err != nil {
-		log.Error("error when initializing config", err)
+		log.Err(err).Error("error when initializing config")
 
 		return err
 	}
 
-	logger.SetLogLevel(logger.StrToLogLevel(cfg.LogLevel))
+	glogger.SetLogLevel(glogger.StrToLogLevel(cfg.Logger.Level))
+	glogger.SetLogFormat(glogger.StrToLogFormat(cfg.Logger.Format))
 
 	ctx, cancelFunc := context.WithCancel(parentCtx)
 	defer cancelFunc()
 
+	log.Debug("initializing app")
 	a, err := newApp(ctx, cfg)
 	if err != nil {
-		log.Error("error when initializing app", err)
+		log.Err(err).Error("error when initializing app")
 
 		return err
 	}
@@ -53,7 +58,7 @@ func Run(parentCtx context.Context) error {
 
 		log.Info("starting app")
 		if err := a.start(); err != nil {
-			log.Error("app stopped with error", err)
+			log.Err(err).Error("app stopped with error")
 
 			return
 		}

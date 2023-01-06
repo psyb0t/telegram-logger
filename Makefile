@@ -9,16 +9,16 @@ dep: ## Get the dependencies + remove unused ones
 	@go mod download
 
 lint: ## Lint Golang files
-	@golint -set_exit_status $(PKG_LIST)
+	@golangci-lint run --timeout=30m0s
 
 build: dep ## Build the executable binary
-	@go build -o build/app cmd/*.go
+	@GO111MODULE=on CGO_ENABLED=0 go build -a -installsuffix cgo -o build/app cmd/*.go
 
 build-docker: ## Build the docker image via docker compose
 	@docker compose build
 
 run: dep ## Run without building
-	@go run cmd/*.go
+	@go run -race cmd/*.go
 
 run-docker: ## Run in a docker container via docker compose
 	@docker compose up
@@ -26,14 +26,14 @@ run-docker: ## Run in a docker container via docker compose
 clean: ## Remove the build directory
 	@rm -rf build
 
-test: ## Run tests
-	@go test -v $(PKG_LIST)
-
 vet: ## Run go vet
 	@go vet $(PKG_LIST)
 
+test: ## Run tests
+	@go test -race -v $(PKG_LIST)
+
 test-coverage: ## Run tests with coverage
-	@go test -short -coverprofile coverage.txt -covermode=atomic ${PKG_LIST}
+	@go test -race -coverprofile coverage.txt -covermode=atomic ${PKG_LIST}
 
 test-coverage-tool: test-coverage ## Run test coverage followed by the cover tool
 	@go tool cover -func=coverage.txt

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"syscall"
 
-	logger "github.com/psyb0t/glogger"
+	"github.com/psyb0t/glogger"
 	app "github.com/psyb0t/telegram-logger/internal/app/v1"
 )
 
@@ -16,12 +16,17 @@ const (
 	serviceName           = "telegram-logger"
 )
 
+// main is the entry point of the application. It sets the service name
+// environment variable, creates a channel to receive os signals, creates
+// a context and wait group and starts the app. If the app returns an error
+// or an os signal is received, the context is cancelled and the wait group
+// is waited to finish.
 func main() {
 	os.Setenv(serviceNameEnvVarName, serviceName)
 	defer os.Unsetenv(serviceNameEnvVarName)
 
-	log := logger.New(logger.Caller{
-		Service:  os.Getenv("SERVICENAME"),
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
 		Package:  "main",
 		Function: "main",
 	})
@@ -50,7 +55,7 @@ func main() {
 		log.Info("received interrupt signal")
 	case err := <-errCh:
 		if err != nil {
-			log.Info("app encountered an error:", err)
+			log.Err(err).Error("app encountered an error")
 		}
 	}
 

@@ -1,2 +1,11 @@
-listenAddress: 0.0.0.0:80
-logLevel: info
+listenAddress: 0.0.0.0:8080
+logger:
+  level: debug
+  format: json
+telegramBot:
+  token:
+  superuserChatID: 38081130
+storage:
+  type: badgerDB
+  badgerDB:
+    dsn: /path/to/db/dir

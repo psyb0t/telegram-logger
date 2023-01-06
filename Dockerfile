@@ -1,17 +1,15 @@
-FROM golang:1.17 as build
+FROM golang:1.19 as build
 
 RUN mkdir -p /app/build/
 WORKDIR /app/
-
-ENV GO111MODULE=on
 
 COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o /app/build/app cmd/*.go
+RUN GO111MODULE=on CGO_ENABLED=0 go build -a -installsuffix cgo -o /app/build/app cmd/*.go
 
-FROM alpine:3.16
+FROM alpine:3.17
 
 RUN apk --no-cache add ca-certificates
 

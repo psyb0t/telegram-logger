@@ -3,10 +3,14 @@ services:
   server:
     build:
       dockerfile: ./Dockerfile
-    image: github.com/psyb0t/telegram-logger
+    image: psyb0t/telegram-logger
     ports:
       - 8080:80
     volumes:
       - ./config.yml:/root/config.yml
+      - ./db:/root/db
     environment:
       - CONFIGFILE=/root/config.yml
+      - TELEGRAMBOTTOKEN=${TELEGRAMBOTTOKEN}
+      # if storage type is badgerDB (currently the only supported one)
+      - STORAGE_BADGERDB_DSN=/root/db
