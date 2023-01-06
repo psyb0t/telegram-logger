@@ -65,6 +65,12 @@ func newConfig() (config, error) {
 			"level":  "debug",
 			"format": "json",
 		},
+		"storage": map[string]interface{}{
+			"type": storageTypeBadgerDB,
+			"badgerDB": map[string]interface{}{
+				"dsn": "",
+			},
+		},
 		"telegramBot": map[string]interface{}{
 			"token":           "",
 			"superuserChatID": 0,
