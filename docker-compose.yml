@@ -7,7 +7,7 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./config.yml:/app/config.yml
+      - ./config.yml:/app/config.yml:ro
       - ./db:/app/db
     environment:
       - CONFIGFILE=/app/config.yml
