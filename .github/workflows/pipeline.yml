@@ -124,6 +124,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          # context: .
           push: true
           tags: psyb0t/telegram-logger:latest
