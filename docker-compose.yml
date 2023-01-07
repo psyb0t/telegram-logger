@@ -7,10 +7,10 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./config.yml:/app/config.yml
+      - ./config.yml:/app/config.yml:ro
       - ./db:/app/db
     environment:
       - CONFIGFILE=/app/config.yml
-      - TELEGRAMBOTTOKEN=${TELEGRAMBOTTOKEN}
+      - TELEGRAMBOT_TOKEN=${TELEGRAMBOT_TOKEN}
       # if storage type is badgerDB (currently the only supported one)
       - STORAGE_BADGERDB_DSN=/app/db

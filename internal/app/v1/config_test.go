@@ -25,8 +25,8 @@ func TestNewConfig(t *testing.T) {
 					Format: "json",
 				},
 				TelegramBot: telegramBotConfig{
-					Token:           "",
-					SuperuserChatID: 0,
+					Token:           "abc",
+					SuperuserChatID: 123,
 				},
 				Storage: storageConfig{
 					Type: "badgerDB",
