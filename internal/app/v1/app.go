@@ -6,7 +6,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/psyb0t/glogger"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage/badgerdb"
@@ -108,7 +107,9 @@ func (a *app) start() error {
 
 	log.Info("opening the database connection")
 	if err := a.db.Open(a.config.Storage.BadgerDB.DSN); err != nil {
-		return errors.Wrap(ErrUnableToOpenDatabaseConnection, err.Error())
+		log.Err(err).Error(ErrUnableToOpenDatabaseConnection.Error())
+
+		return ErrUnableToOpenDatabaseConnection
 	}
 
 	var wg sync.WaitGroup
