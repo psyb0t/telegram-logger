@@ -169,4 +169,3 @@ curl -X POST -H "Content-Type: application/json" -H "X-ID: abcdef" -d '{
 - build embeddable helper packages to interact with a deployed service
 - add telegram chat id parameter to /start and /stop so that superadmins can create and delete users manually
 - add example on how to run via bin release
-- update go-config-parser package after making it not return error when config file does not exist - for when the user just wants to set env vars

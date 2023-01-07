@@ -9,7 +9,6 @@ import (
 
 const (
 	configFileEnvVarName = "CONFIGFILE"
-	defaultConfigFile    = "./config.yml"
 	defaultListenAddress = "0.0.0.0:80"
 	defaultLogLevel      = "debug"
 )
@@ -55,9 +54,6 @@ type config struct {
 // over defaults and values set in the config file
 func newConfig() (config, error) {
 	configFile := os.Getenv(configFileEnvVarName)
-	if configFile == "" {
-		configFile = defaultConfigFile
-	}
 
 	defaults := map[string]interface{}{
 		"listenAddress": defaultListenAddress,

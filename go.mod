@@ -8,9 +8,8 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/google/uuid v1.3.0
-	github.com/pkg/errors v0.9.1
 	github.com/psyb0t/glogger v0.0.0-20230103225318-2aad03e86abe
-	github.com/psyb0t/go-config-parser v0.0.0-20221219022636-67c32dc17128
+	github.com/psyb0t/go-config-parser v1.0.0
 	github.com/stretchr/testify v1.8.1
 	github.com/valyala/fasthttp v1.43.0
 )
@@ -39,6 +38,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/savsgio/gotils v0.0.0-20220530130905-52f3993e8d6d // indirect
 	github.com/spf13/afero v1.9.3 // indirect
@@ -52,8 +52,8 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
