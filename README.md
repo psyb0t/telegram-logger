@@ -73,12 +73,19 @@ The service listens for HTTP POST requests to the root path and sends the reques
 }
 ```
 
-### Response
+### Success response
 
 ```json
 {
-  "error": "Something went wrong!",
-  "message": "Your request could not be processed"
+  "message": "successfully sent log entry via Telegram"
+}
+```
+
+### Error response
+
+```json
+{
+  "error": "Bad Request: message text is empty"
 }
 ```
 
@@ -96,7 +103,7 @@ When running via using the docker image you will need to use port 80 on the list
 
 ### Run via docker
 
-```
+```bash
 docker run -it \
     --env CONFIGFILE=/app/config.yml \
     --env LOGGER_LEVEL=debug \
@@ -137,6 +144,41 @@ services:
 
 ```
 docker compose -f docker-compose.yml up
+```
+
+### Run via latest released binary
+
+`download-latest.sh`
+
+```bash
+#!/usr/bin/env bash
+owner=psyb0t
+repo=telegram-logger
+asset_name=telegram-logger-linux-amd64
+
+echo "Looking up the latest release of $asset_name for github.com/$owner/$repo..."
+releases=$(curl -s https://api.github.com/repos/$owner/$repo/releases)
+latest_release=$(echo "$releases" | jq -r '.[0]')
+asset_url=$(echo "$latest_release" | jq -r ".assets[] | select(.name == \"$asset_name\") | .browser_download_url")
+
+echo "Downloading $asset_url..."
+curl -s -L -o "$asset_name" "$asset_url"
+
+chmod +x "$asset_name"
+```
+
+`run.sh`
+
+```bash
+export LISTENADDRESS=0.0.0.0:8080
+export LOGGER_LEVEL=debug
+export LOGGER_FORMAT=json
+export TELEGRAMBOT_TOKEN=TOKEN
+export TELEGRAMBOT_SUPERUSERCHATID=CHATID
+export STORAGE_TYPE=badgerDB
+export STORAGE_BADGERDB_DSN=./db
+
+./telegram-logger-linux-amd64
 ```
 
 ## Interacting with the service
