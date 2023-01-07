@@ -54,6 +54,21 @@ func TestNewConfig(t *testing.T) {
 			expectError:   true,
 			expectedValue: config{},
 		},
+		{
+			name:        "no config file",
+			configFile:  "",
+			expectError: false,
+			expectedValue: config{
+				ListenAddress: defaultListenAddress,
+				Logger: loggerConfig{
+					Level:  defaultLogLevel,
+					Format: defaultLogFormat,
+				},
+				Storage: storageConfig{
+					Type: storageTypeBadgerDB,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

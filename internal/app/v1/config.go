@@ -11,6 +11,7 @@ const (
 	configFileEnvVarName = "CONFIGFILE"
 	defaultListenAddress = "0.0.0.0:80"
 	defaultLogLevel      = "debug"
+	defaultLogFormat     = "json"
 )
 
 type storageType string
@@ -58,8 +59,8 @@ func newConfig() (config, error) {
 	defaults := map[string]interface{}{
 		"listenAddress": defaultListenAddress,
 		"logger": map[string]interface{}{
-			"level":  "debug",
-			"format": "json",
+			"level":  defaultLogLevel,
+			"format": defaultLogFormat,
 		},
 		"storage": map[string]interface{}{
 			"type": storageTypeBadgerDB,
