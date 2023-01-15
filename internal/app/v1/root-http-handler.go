@@ -109,6 +109,10 @@ func requestToTelegramMessageString(request types.Request) (string, error) {
 		telegramMsg += fmt.Sprintf("SpanID: %s\n", request.SpanID)
 	}
 
+	if request.Error != "" {
+		telegramMsg += fmt.Sprintf("Error: %s\n", request.Error)
+	}
+
 	if request.Message != "" {
 		telegramMsg += fmt.Sprintf("Message: %s\n", request.Message)
 	}
