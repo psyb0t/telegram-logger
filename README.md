@@ -209,5 +209,3 @@ curl -X POST -H "Content-Type: application/json" -H "X-ID: abcdef" -d '{
 - add trace id to logs
 - create external wrapper package based on telegramBotMessageHandler
 - build embeddable helper packages to interact with a deployed service
-- add telegram chat id parameter to /start and /stop so that superadmins can create and delete users manually
-- add example on how to run via bin release
