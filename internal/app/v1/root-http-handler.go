@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/psyb0t/glogger"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
@@ -85,6 +86,12 @@ func (a *app) rootHTTPHandler(ctx *fasthttp.RequestCtx) {
 // there was an issue building the string.
 func requestToTelegramMessageString(request types.Request) (string, error) {
 	telegramMsg := ""
+
+	emoji := getLogLevelEmoji(request.Level)
+	if emoji != "" {
+		telegramMsg += fmt.Sprintf("%s\n", strings.Repeat(emoji, 10))
+	}
+
 	if request.Caller != "" {
 		telegramMsg += fmt.Sprintf("Caller: %s\n", request.Caller)
 	}
