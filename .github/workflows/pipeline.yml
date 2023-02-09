@@ -59,19 +59,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: ${{ runner.os }}-build-${{ hashFiles('**/*.go', '**/go.mod') }}
+          key: build-${{ hashFiles('**/*.go', '**/go.mod') }}
           restore-keys: |
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            build-
 
   release:
     if: contains(github.ref, 'refs/tags/')
     needs: build
-    runs-on: "ubuntu-latest"
-    strategy:
-      matrix:
-        goosarch:
-          - "linux/amd64"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -80,27 +75,16 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: ${{ runner.os }}-build-${{ hashFiles('**/*.go', '**/go.mod') }}
-
-      - name: Get OS and arch info
-        run: |
-          GOOSARCH=${{matrix.goosarch}}
-          GOOS=${GOOSARCH%/*}
-          GOARCH=${GOOSARCH#*/}
-          BINARY_NAME=$(basename "${{github.repository}}-$GOOS-$GOARCH")
-          echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
-          echo "GOOS=$GOOS" >> $GITHUB_ENV
-          echo "GOARCH=$GOARCH" >> $GITHUB_ENV
-
-      - name: Copy build/app to $BINARY_NAME
-        run: cp build/app "$BINARY_NAME"
+          key: build-${{ hashFiles('**/*.go', '**/go.mod') }}
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           draft: false
           files: |
-            ${{env.BINARY_NAME}}
+            build/base-go-http-service-linux-amd64
+            build/base-go-http-service-windows-amd64.exe
+            build/base-go-http-service-darwin-amd64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
