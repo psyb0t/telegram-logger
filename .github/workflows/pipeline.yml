@@ -82,9 +82,9 @@ jobs:
         with:
           draft: false
           files: |
-            build/base-go-http-service-linux-amd64
-            build/base-go-http-service-windows-amd64.exe
-            build/base-go-http-service-darwin-amd64
+            build/telegram-logger-linux-amd64
+            build/telegram-logger-windows-amd64.exe
+            build/telegram-logger-darwin-amd64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

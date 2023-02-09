@@ -1,6 +1,6 @@
 .PHONY: build
 MAKEFLAGS += --no-print-directory
-PKG_BASENAME := "base-go-http-service"
+PKG_BASENAME := "telegram-logger"
 PKG := "github.com/psyb0t/$(PKG)"
 PKG_LIST := $(shell go list $(PKG)/...)
 
