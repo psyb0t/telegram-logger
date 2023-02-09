@@ -59,7 +59,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: build-${{ hashFiles('**/*.go', '**/go.mod') }}
+          key: build-${{ hashFiles('**/*', '!build', '!.git') }}
           restore-keys: |
             build-
 
@@ -75,7 +75,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: build-${{ hashFiles('**/*.go', '**/go.mod') }}
+          key: build-${{ hashFiles('**/*', '!build', '!.git') }}
 
       - name: Release
         uses: softprops/action-gh-release@v1
