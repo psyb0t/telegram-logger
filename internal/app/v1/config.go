@@ -76,7 +76,7 @@ func newConfig() (config, error) {
 
 	cfg := config{}
 	if err := configparser.Parse(configparser.ConfigFileTypeYAML,
-		configFile, &cfg, defaults); err != nil {
+		configFile, &cfg, defaults, ""); err != nil {
 		return config{}, err
 	}
 
