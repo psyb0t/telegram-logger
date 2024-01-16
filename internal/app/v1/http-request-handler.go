@@ -25,7 +25,7 @@ func (a *app) getHTTPRequestHandler() fasthttp.RequestHandler {
 }
 
 // returnHTTPResponseString returns an HTTP response with the provided
-// status code and body as a string
+// status code and body as a string.
 func (a *app) returnHTTPResponseString(
 	ctx *fasthttp.RequestCtx, statusCode int, body string,
 ) {
@@ -60,8 +60,8 @@ func (a *app) returnHTTPResponseJSON(
 // returnHTTPResponse returns an HTTP response with the provided status code,
 // content type, and body.
 func (a *app) returnHTTPResponse(ctx *fasthttp.RequestCtx,
-	statusCode int, contentType string, body []byte) {
-
+	statusCode int, contentType string, body []byte,
+) {
 	ctx.SetContentType(contentType)
 	ctx.SetStatusCode(statusCode)
 	ctx.SetBody(body)

@@ -62,7 +62,9 @@ func TestApp_returnHTTPResponseJSON(t *testing.T) {
 	}{
 		{fasthttp.StatusOK, map[string]string{"message": "OK"}, `{"message":"OK"}`},
 		{fasthttp.StatusNotFound, map[string]string{"error": "Not Found"}, `{"error":"Not Found"}`},
-		{fasthttp.StatusInternalServerError, map[string]string{"error": "Internal Server Error"}, `{"error":"Internal Server Error"}`},
+		{fasthttp.StatusInternalServerError, map[string]string{
+			"error": "Internal Server Error",
+		}, `{"error":"Internal Server Error"}`},
 	}
 
 	// Loop over the test cases
@@ -94,7 +96,8 @@ func TestApp_returnHTTPResponse(t *testing.T) {
 	}{
 		{fasthttp.StatusOK, contentTypeTextPlain, []byte("OK"), "OK"},
 		{fasthttp.StatusNotFound, contentTypeTextPlain, []byte("Not Found"), "Not Found"},
-		{fasthttp.StatusInternalServerError, contentTypeApplicationJSON, []byte(`{"error":"Internal Server Error"}`), `{"error":"Internal Server Error"}`},
+		{fasthttp.StatusInternalServerError, contentTypeApplicationJSON, []byte(
+			`{"error":"Internal Server Error"}`), `{"error":"Internal Server Error"}`},
 	}
 
 	// Loop over the test cases

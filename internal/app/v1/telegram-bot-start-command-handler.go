@@ -44,8 +44,28 @@ func (a *app) telegramBotStartCommandHandler(chatID int64) error {
 		}
 	}()
 
-	log.Data("chatID", chatID).Debug("deleting all users matching the telegram chat id")
-	err := a.db.GetUserRepositoryWriter().DeleteAllByTelegramChatID(chatID)
+	if err := a.createUser(user); err != nil {
+		errMsg = "error when creating user"
+		log.Err(err).Error(errMsg)
+
+		return err
+	}
+
+	return nil
+}
+
+func (a *app) createUser(user types.User) error {
+	log := glogger.New(glogger.Caller{
+		Service:  os.Getenv(serviceNameEnvVarName),
+		Package:  packageName,
+		Receiver: "app",
+		Function: "createUser",
+	})
+
+	var errMsg string
+
+	log.Data("chatID", user.TelegramChatID).Debug("deleting all users matching the telegram chat id")
+	err := a.db.GetUserRepositoryWriter().DeleteAllByTelegramChatID(user.TelegramChatID)
 	if err != nil {
 		errMsg = "error when cleaning up the database by telegram chat ID"
 		log.Err(err).Error(errMsg)

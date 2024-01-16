@@ -22,8 +22,11 @@ const (
 // or an os signal is received, the context is cancelled and the wait group
 // is waited to finish.
 func main() {
-	os.Setenv(serviceNameEnvVarName, serviceName)
-	defer os.Unsetenv(serviceNameEnvVarName)
+	if err := os.Setenv(serviceNameEnvVarName, serviceName); err != nil {
+		panic(err)
+	}
+
+	defer os.Unsetenv(serviceNameEnvVarName) //nolint:errcheck
 
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),

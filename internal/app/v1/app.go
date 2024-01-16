@@ -6,18 +6,17 @@ import (
 	"os"
 	"sync"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/psyb0t/glogger"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage"
 	"github.com/psyb0t/telegram-logger/internal/pkg/storage/badgerdb"
 	"github.com/valyala/fasthttp"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // app contains the context, cancel function, config, HTTP server,
 // Telegram bot API, and database connection for the app.
 type app struct {
-	ctx            context.Context
+	ctx            context.Context //nolint:containedctx
 	cancelFunc     context.CancelFunc
 	config         config
 	httpServer     fasthttp.Server

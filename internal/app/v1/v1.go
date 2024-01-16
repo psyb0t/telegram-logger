@@ -16,7 +16,8 @@ const (
 // Run starts the app in a separate goroutine and waits for it to stop.
 // It initializes a logger and reads in a configuration file.
 // It then creates a context with a cancel function, which is used to stop the app when the context is cancelled.
-// The app is started in a separate goroutine, and the function waits for the context to be done before stopping the app and waiting for the goroutine to finish.
+// The app is started in a separate goroutine, and the function waits for
+// the context to be done before stopping the app and waiting for the goroutine to finish.
 // If the app stopped with an error, that error is returned by the function.
 //
 // parentCtx: the parent context to use for the app's context.

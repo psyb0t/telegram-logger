@@ -25,7 +25,7 @@ type storageBadgerDBConfig struct {
 }
 
 type storageConfig struct {
-	Type     storageType           `yaml:"type" validate:"required"`
+	Type     storageType           `validate:"required" yaml:"type"`
 	BadgerDB storageBadgerDBConfig `yaml:"badgerDB"`
 }
 
@@ -40,7 +40,7 @@ type loggerConfig struct {
 }
 
 type config struct {
-	ListenAddress string            `yaml:"listenAddress" validate:"hostname_port"`
+	ListenAddress string            `validate:"hostname_port" yaml:"listenAddress"`
 	Logger        loggerConfig      `yaml:"logger"`
 	TelegramBot   telegramBotConfig `yaml:"telegramBot"`
 	Storage       storageConfig     `yaml:"storage"`
@@ -52,7 +52,7 @@ type config struct {
 //
 // Note: configparser uses viper with AutomaticEnv() meaning that
 // env vars such as LOGGER_LEVEL or TELEGRAMBOT_TOKEN will be used
-// over defaults and values set in the config file
+// over defaults and values set in the config file.
 func newConfig() (config, error) {
 	configFile := os.Getenv(configFileEnvVarName)
 

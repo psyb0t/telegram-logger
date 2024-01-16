@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -35,7 +36,7 @@ func (a *app) rootHTTPHandler(ctx *fasthttp.RequestCtx) {
 	if err != nil {
 		log.Err(err).Error("there was an error when getting the user by ID")
 
-		if err == storage.ErrEmptyID || err == storage.ErrNotFound {
+		if errors.Is(err, storage.ErrEmptyID) || errors.Is(err, storage.ErrNotFound) {
 			a.returnHTTPResponseString(ctx, fasthttp.StatusUnauthorized, "")
 
 			return

@@ -96,6 +96,7 @@ The service has a number of commands that can be sent via the Telegram bot by a 
 - /start: generates a unique ID for the user and sends it to the user in a welcome message. The user can then use this ID in the X-ID header of HTTP POST requests to the app to authenticate themselves.
 - /stop: stops sending log entries to the user and removes the user's ID from the database.
 - /getAllUsers (superadmin only): retrieves a list of all users from the database and sends it to the user via the Telegram bot.
+- /addUser (superadmin only): adds a new user to the database by chat ID. (eg. `/addUser 1002080652973`)
 
 ## Running the service
 
@@ -209,3 +210,4 @@ curl -X POST -H "Content-Type: application/json" -H "X-ID: abcdef" -d '{
 - add trace id to logs
 - create external wrapper package based on telegramBotMessageHandler
 - build embeddable helper packages to interact with a deployed service
+- fix linting

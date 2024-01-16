@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,7 +36,7 @@ func TestNewConfig(t *testing.T) {
 			},
 		},
 		{
-			name:          "badly formatted config config",
+			name:          "badly formatted config",
 			configFile:    "./.fixture/badly-formatted-config.yml",
 			expectError:   true,
 			expectedValue: config{},
@@ -73,12 +72,12 @@ func TestNewConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			os.Setenv(configFileEnvVarName, test.configFile)
-			defer os.Unsetenv(configFileEnvVarName)
+			t.Setenv(configFileEnvVarName, test.configFile)
 
 			actual, err := newConfig()
 			if test.expectError {
 				assert.Error(t, err)
+
 				return
 			}
 

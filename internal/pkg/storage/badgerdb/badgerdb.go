@@ -3,6 +3,7 @@ package badgerdb
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	badger "github.com/dgraph-io/badger/v3"
@@ -19,7 +20,7 @@ type filterFunc func(key, val []byte) bool
 
 // badgerDB is a struct that implements the Storage interface using a BadgerDB database.
 type badgerDB struct {
-	ctx            context.Context
+	ctx            context.Context //nolint:containedctx
 	cancelFunc     context.CancelFunc
 	db             *badger.DB
 	wg             sync.WaitGroup
@@ -66,22 +67,22 @@ func (db *badgerDB) Close() error {
 }
 
 // Ping checks if the database is reachable and responding.
-// badgerDB does not have a method for this so it will just return nil
+// badgerDB does not have a method for this so it will just return nil.
 func (db *badgerDB) Ping() error {
 	return nil
 }
 
-// GetUserRepositoryReader returns a repository for reading user data from the database
+// GetUserRepositoryReader returns a repository for reading user data from the database.
 func (db *badgerDB) GetUserRepositoryReader() storage.UserRepositoryReader {
 	return db.userRepository.reader
 }
 
-// GetUserRepositoryWriter returns a repository for writing user data from the database
+// GetUserRepositoryWriter returns a repository for writing user data from the database.
 func (db *badgerDB) GetUserRepositoryWriter() storage.UserRepositoryWriter {
 	return db.userRepository.writer
 }
 
-// get retrieves a value by key
+// get retrieves a value by key.
 func (db *badgerDB) get(key []byte) ([]byte, error) {
 	db.wg.Add(1)
 	defer db.wg.Done()
@@ -94,7 +95,7 @@ func (db *badgerDB) get(key []byte) ([]byte, error) {
 	item, err := tx.Get(key)
 	if err != nil {
 		// If the key is not found, return an error.
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil, storage.ErrNotFound
 		}
 
@@ -110,7 +111,7 @@ func (db *badgerDB) get(key []byte) ([]byte, error) {
 	return val, err
 }
 
-// getAllByPrefix retrieves a slice of values for keys prefixed with prefix
+// getAllByPrefix retrieves a slice of values for keys prefixed with prefix.
 func (db *badgerDB) getAllByPrefix(prefix []byte) ([][]byte, error) {
 	db.wg.Add(1)
 	defer db.wg.Done()
@@ -197,14 +198,13 @@ func (db *badgerDB) getByPrefixAndFilterFunc(prefix []byte, filterFn filterFunc,
 			if len(results) == n {
 				return results, nil
 			}
-
 		}
 	}
 
 	return results, nil
 }
 
-// create stores a value for the given key
+// create stores a value for the given key.
 func (db *badgerDB) create(key []byte, val []byte) error {
 	db.wg.Add(1)
 	defer db.wg.Done()
@@ -222,7 +222,7 @@ func (db *badgerDB) create(key []byte, val []byte) error {
 	return tx.Commit()
 }
 
-// delete removes data from the database by the given key
+// delete removes data from the database by the given key.
 func (db *badgerDB) delete(key []byte) error {
 	db.wg.Add(1)
 	defer db.wg.Done()
@@ -234,7 +234,7 @@ func (db *badgerDB) delete(key []byte) error {
 	// Delete the data from the database using the provided key.
 	if err := tx.Delete(key); err != nil {
 		// If the key is not found, return the ErrNotFound error.
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return storage.ErrNotFound
 		}
 

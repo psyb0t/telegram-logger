@@ -7,6 +7,9 @@ var (
 	ErrUnableToOpenDatabaseConnection = errors.New("error when opening database connection")
 	// ErrUnsupportedStorageType is returned when an unsupported storage type is used.
 	ErrUnsupportedStorageType = errors.New("unsupported storage type")
-	// ErrUnauthorizedToUseTelegramBotCommand is returned when the trying to use the telegram bot command is not a superuser
+	// ErrUnauthorizedToUseTelegramBotCommand is returned when the trying
+	// to use the telegram bot command is not a superuser.
 	ErrUnauthorizedToUseTelegramBotCommand = errors.New("unauthorized to use command")
+	// ErrInsufficientArguments is returned when there are not enough arguments to use the command.
+	ErrInsufficientArguments = errors.New("insufficient arguments")
 )

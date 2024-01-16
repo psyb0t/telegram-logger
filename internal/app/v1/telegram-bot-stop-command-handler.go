@@ -16,7 +16,7 @@ Chat ID %d has been removed from the system.`
 // telegramBotStopCommandHandler handles the telegramBotStopCommand command
 // of the Telegram bot. When this function is called, it removes all users
 // with the provided chat ID from the system and sends notification to the user
-// via Telegram
+// via Telegram.
 func (a *app) telegramBotStopCommandHandler(chatID int64) error {
 	log := glogger.New(glogger.Caller{
 		Service:  os.Getenv(serviceNameEnvVarName),
