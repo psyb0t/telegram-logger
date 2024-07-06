@@ -202,5 +202,6 @@ More clients in the pipeline. Stay tuned.
 - Create external wrapper package based on telegramBotMessageHandler
 - Build embeddable helper packages to interact with a deployed service
 - Fix linting
+- SQLITE support
 
 Now go forth and hack those logs! 🖥️
